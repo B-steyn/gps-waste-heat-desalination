@@ -1,0 +1,6 @@
+# Python 3.13 (the results were produced on 3.13.5)
+numpy==2.5.0
+pandas==3.0.3
+CoolProp==7.2.0
+matplotlib==3.11.0
+openpyxl==3.1.5    # Module 0 only: reads the station's .xlsx files
