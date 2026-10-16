@@ -44,8 +44,8 @@ python run_all.py                   # the whole model, about 15 minutes on 8 cor
 
 ## Data
 
-The station's operating data are not included. They were supplied by the
-station for this thesis and are not published with the code. To run the
+The station's operating data is not included. The data supplied by the
+station for this thesis and is not published with the code. To run the
 model, place the two source spreadsheets in `raw_data/`:
 
 - `GPS_Data_received_v2.xlsx`, sheet `Flue Gas`: six-hourly unit load, and
