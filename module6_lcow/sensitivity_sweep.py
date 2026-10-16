@@ -70,7 +70,7 @@ def load_designs(output_dir, basis="bhojwani_global"):
     return out
 
 # --- sensitivities: (label, attribute, values, baseline) ---
-# O&M rates: Ruiz-Garcia & Nuez (2017) bands. WACC: Gohdes et al. (2022),
+# O&M rates: heat recovery from Aromada et al. (2020) and Coppieters & Blondeau (2019); water assumed. WACC: Gohdes et al. (2022),
 # about 5 % (government-backed) to 13 % (merchant), nominal. Electricity:
 # AEMO QED Q4-2025 low to the AER CY2024 Queensland average. Asset life: a
 # one-directional downside (station closure can only shorten it).
