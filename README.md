@@ -5,8 +5,14 @@ Gladstone Power Station (Queensland) and using it to produce desalinated
 water. It is the code behind Brendan Steyn's undergraduate thesis
 (EGH490, Queensland University of Technology, 2026).
 
+## Report
+
+B. Steyn, "Coal Flue Gas Waste Heat Recovery to Desalinate Seawater at Gladstone Power Station,"
+EGH490 final research report, Queensland University of Technology, 2026. Appendix F of the report
+maps each defining calculation to its file and lines in this repository.
+
 The heat is taken from the flue-gas duct just downstream of each fabric
-filter, through a flue-gas exchanger (FGCHE) and a closed water loop. The
+filter, through a flue-gas condensing heat exchanger (FGCHE) and a closed water loop. The
 model compares desalination architectures on their levelised cost of water
 (LCOW, A$/m³):
 
@@ -44,7 +50,7 @@ python run_all.py                   # the whole model, about 15 minutes on 8 cor
 
 ## Data
 
-The station's operating data is not included. The data supplied by the
+The station's operating data is not included. The data was supplied by the
 station for this thesis and is not published with the code. To run the
 model, place the two source spreadsheets in `raw_data/`:
 
@@ -76,7 +82,7 @@ The pipeline runs in this order (`run_all.py`):
 | 9 | `module6_lcow/sensitivity_sweep.py` | one-at-a-time (tornado) and full-factorial sensitivity |
 | 10 | `module6_lcow/monte_carlo.py` | Monte Carlo LCOW distributions and paired penalties |
 | 11 | `module6_lcow/stage4_corners.py` | the ORC+RO design re-optimised at the corners of the sensitivity space (slow) |
-| 12 | `analysis/supporting_calculations.py` | supporting calculations CR4–CR15 (below) |
+| 12 | `analysis/supporting_calculations.py` | supporting calculations CR4–CR15 |
 | 13 | `analysis/energy_tables.py` | fan power, heat by track, grid import and exergy balances |
 | 14 | `reporting/final_results.py` | `FINAL_RESULTS.csv`: every headline figure, with its basis and source |
 | 15 | `reporting/sensitivity_table.py` | every swept input, its range and its baseline |
@@ -107,7 +113,7 @@ not run by `run_all.py` and not costed).
 - **Costs** are constant 2026 Australian dollars, discounted at a real rate.
 - **Extraction tracks** are the exchanger's gas outlet temperature: 100, 95,
   90 and 85 °C.
-- **Design record.** Equipment is sized and priced at the operating record
+- **Design record** (the report's design point). Equipment is sized and priced at the operating record
   with the largest flue-gas flow. The ID fan limit is checked against every
   record, and annual energy (ORC output, added fan power) is the mean over
   the operating records (`module6_lcow.heat_side_annual_kw`).

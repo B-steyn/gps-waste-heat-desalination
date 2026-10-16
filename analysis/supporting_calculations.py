@@ -515,10 +515,10 @@ def med_sizing_check():
 
 
 # ==========================================================================
-# CR7 - ORC specific investment cost against the literature band
+# CR7 - ORC specific investment cost against the scope of work's range
 # ==========================================================================
 def cr7():
-    note("== CR7 ORC specific cost against the 2,000-5,000 A$/kW literature band")
+    note("== CR7 ORC specific cost against the 2,000-5,000 A$/kW scope-of-work range")
     g, opt = _m6("bhojwani_global"), _opt()
     lo, hi = ORC_SPECIFIC_COST_AUD_PER_KW
     recs = []

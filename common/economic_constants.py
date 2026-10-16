@@ -94,8 +94,8 @@ HX_MATERIAL_MULTIPLIER_904L = (4.0, 5.0)  # ASSUMPTION - no published 904L facto
 # ==========================================
 # ORC costing
 # ==========================================
-ORC_SPECIFIC_COST_AUD_PER_KW = (2000.0, 5000.0)  # VERIFIED - SOW reference [45], sub-200 C systems
-ORC_SPECIFIC_COST_BASELINE = 3500.0              # ASSUMPTION - midpoint
+ORC_SPECIFIC_COST_AUD_PER_KW = (2000.0, 5000.0)  # UNCITED - the scope of work's range; the paper it cited (Pili et al. 2017) gives no $/kW
+ORC_SPECIFIC_COST_BASELINE = 3500.0              # ASSUMPTION - turbine, pump and generator only, applied as installed; probably low (report Table B3)
 
 # ==========================================
 # desalination capital - Bhojwani et al. (2019)
@@ -155,14 +155,14 @@ MED_COMMERCIAL_AVAILABILITY_PENALTY = 1.20   # ASSUMPTION - first of a kind in A
 # ==========================================
 # operating costs
 # ==========================================
-OANDM_RATE_ORC_HX = 0.04      # UNVERIFIED - Ruiz-Garcia & Nuez (2017), 3-6 % band
-OANDM_RATE_MED_RO = 0.06      # UNVERIFIED - Ruiz-Garcia & Nuez (2017), 5-8 % band
+OANDM_RATE_ORC_HX = 0.04      # within the 4-6 % of Aromada et al. (2020) and Coppieters & Blondeau (2019); swept 3-6 %
+OANDM_RATE_MED_RO = 0.06      # ASSUMPTION - swept 5-8 %
 
 # Electricity, valued at one price for imports and exports. At a generating
 # site the basis is genuinely ambiguous (wholesale, internal transfer cost or
 # forgone export), so a single wholesale price is used and swept.
-ELECTRICITY_AUD_PER_MWH = 65.00                # VERIFIED - AEMO Queensland averages, 2025-26 and 2026-27
-ELECTRICITY_SWEEP_AUD_PER_MWH = (58.0, 128.0)  # VERIFIED - AEMO QED Q4-2025 low; AER CY2024 Queensland average
+ELECTRICITY_AUD_PER_MWH = 65.00                # VERIFIED - AEMO NEM data dashboard, annual average price, Queensland 2025-26: A$65.47/MWh
+ELECTRICITY_SWEEP_AUD_PER_MWH = (58.0, 128.0)  # VERIFIED - AEMO QED Q4 2025 Queensland average; AER State of the energy market 2025, Queensland CY2024 (demand-weighted)
 
 # Membranes are a component of the RO O&M rate ("10-20 % of RO OPEX"), not a
 # separate charge on top of it; membrane life scales that component

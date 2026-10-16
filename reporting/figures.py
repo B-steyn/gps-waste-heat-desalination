@@ -23,6 +23,7 @@ hairlines, each panel has one y-axis, legends appear only for two or more
 series, and text is set in ink, never in a series colour.
 """
 
+import os
 import subprocess
 import sys
 from datetime import datetime
@@ -43,6 +44,7 @@ from common.constants import ORC_EVAPORATOR_PINCH_C
 SRC = ROOT / "results"
 OUT = SRC / "figures"
 INDEX = []
+REPORT = os.environ.get("FIGURES_FOR_REPORT") == "1"   # report copies: no footnote, no basis title
 
 INK, INK2, MUTED, GRID, BASE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
 S1, S2, S3 = "#2a78d6", "#eb6834", "#1baf7a"      # categorical slots 1-3, in order
@@ -147,7 +149,7 @@ def fig1_bridge():
             level += v
         if i < len(seq) - 1:
             ax.plot([xs[i] + 0.3, xs[i + 1] - 0.3], [level, level], color=MUTED, lw=0.7, zorder=2)
-    ax.annotate("the heat's entire\nbenefit", xy=(xs[i_save], t_d + 0.2), xytext=(xs[i_save], t_d + 0.62),
+    ax.annotate("The heat's entire\nbenefit", xy=(xs[i_save], t_d + 0.2), xytext=(xs[i_save], t_d + 0.62),
                 ha="center", va="bottom", fontsize=8, color=INK2,
                 arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.7))
     ax.set_xticks(xs, [s[0] for s in seq])
@@ -160,10 +162,11 @@ def fig1_bridge():
     ax.set_ylabel("LCOW (A$/m³)")
     ax.set_title(f"Recovering the heat adds A${t_d - t_p:.2f}/m³ over conventional SWRO; "
                  f"the ORC adds A${t_o - t_d:.2f} more", loc="left", color=INK)
-    ax.legend(handles=[Patch(color=S1, label="LCOW"), Patch(color=S2, label="cost added"),
-                       Patch(color=S3, label="saving")], loc="upper left", ncol=3)
+    ax.legend(handles=[Patch(color=S1, label="LCOW"), Patch(color=S2, label="Cost added"),
+                       Patch(color=S3, label="Saving")], loc="upper left", ncol=3)
     foot = "Global cost basis, capacity held at the Direct-RO plant's."
-    fig.text(0.01, -0.04, foot, fontsize=7.5, color=INK2)
+    if not REPORT:
+        fig.text(0.01, -0.04, foot, fontsize=7.5, color=INK2)
     save(fig, "fig1_lcow_bridge",
          "LCOW bridge from conventional SWRO to Direct-RO to ORC+RO, component by component. The ORC step: "
          "its evaporator and condenser, the larger FGCHE its warmer loop return needs, the O&M on that extra "
@@ -203,7 +206,7 @@ def fig2_penalties():
         ax.text(0.98, 0.60, f"above zero in\n{int((s > 0).sum()):,} of {len(s):,}\n"
                 f"min {s.min():.2f} · max {s.max():.2f}", transform=ax.transAxes, ha="right",
                 va="top", fontsize=7.5, color=INK2)
-    axs[0].set_ylabel("input combinations")
+    axs[0].set_ylabel("Input combinations")
     save(fig, "fig2_penalty_distribution",
          f"Paired penalties on the global cost basis: every one of the {len(heat):,} combinations of the "
          "nine swept economic inputs, each architecture scored on the same inputs. A grid of equally "
@@ -224,8 +227,8 @@ def fig3_pinch():
         x = c[c.case == case].sort_values("fraction")
         qt = x.q_cumulative_kw.max()
         mw = (qt - x.q_cumulative_kw) / 1000.0                   # heat from the cold end
-        ax.plot(mw, x.t_hot_c, color=S2, label="loop water", zorder=3)
-        ax.plot(mw, x.t_cold_c, color=S1, label="working fluid", zorder=3)
+        ax.plot(mw, x.t_hot_c, color=S2, label="Loop water", zorder=3)
+        ax.plot(mw, x.t_cold_c, color=S1, label="Working fluid", zorder=3)
         i = x.approach_k.idxmin()
         if case == "invalid":
             ax.fill_between(mw, x.t_hot_c, x.t_cold_c, where=x.t_cold_c > x.t_hot_c, color=CRIT,
@@ -243,12 +246,12 @@ def fig3_pinch():
         ax.text(0.45 if case == "invalid" else 0.40, 0.03 if case == "invalid" else 0.12, note,
                 transform=ax.transAxes, fontsize=7, color=INK2, va="bottom")
         ax.set_title(titles[case], loc="left", color=INK)
-        ax.set_xlabel("heat from the cold end (MW)")
+        ax.set_xlabel("Heat from the cold end (MW)")
         if k == 0:
-            ax.set_ylabel("temperature (°C)")
+            ax.set_ylabel("Temperature (°C)")
     ax = fig.add_subplot(gs[1, :])
-    for case, col, lab in (("invalid", CRIT, "endpoint-passing design"),
-                           ("corrected", INK2, "design as modelled")):
+    for case, col, lab in (("invalid", CRIT, "Endpoint-passing design"),
+                           ("corrected", INK2, "Design as modelled")):
         x = e[e.case == case].sort_values("fraction")
         qt = c[c.case == case].q_cumulative_kw.max()
         tot = float(x.e_d_cumulative_kw.iloc[-1])
@@ -256,8 +259,8 @@ def fig3_pinch():
                 label=f"{lab}: {tot:+,.0f} kW in total", zorder=3)
     ax.axhline(0, color=INK, lw=0.8, zorder=2)
     ax.set_title("Second law: exergy destruction can never be negative", loc="left", color=INK)
-    ax.set_xlabel("heat from the cold end (MW)")
-    ax.set_ylabel("exergy destroyed,\ncumulative (kW)")
+    ax.set_xlabel("Heat from the cold end (MW)")
+    ax.set_ylabel("Exergy destroyed,\ncumulative (kW)")
     ax.legend(loc="upper left")
     save(fig, "fig3_pinch_composite",
          "Top: evaporator composite curves for the design an endpoint check passes (left) and the "
@@ -274,11 +277,11 @@ def fig4_scan():
     cap_lr, cap_rows = ok.loop_return_c.max(), int(ok.rows.max())
     fig, axs = plt.subplots(3, 1, figsize=(6.5, 6.6), sharex=True)
     panels = (("lcow_aud_per_m3", "LCOW (A$/m³)", "min", 2),
-              ("net_electricity_kw", "net electricity,\nannual mean (kW)", "max", 0),
-              ("w_net_kw", "ORC net output,\ndesign record (kW)", "max", 0))
+              ("net_electricity_kw", "Net electricity,\nannual mean (kW)", "max", 0),
+              ("w_net_kw", "ORC net output,\ndesign point (kW)", "max", 0))
     for ax, (col, lab, sense, dp) in zip(axs, panels):
         ax.axvspan(cap_lr, s.loop_return_c.max() + 0.5, color=SHADE, lw=0, zorder=0)
-        for p, colr, name in (("A", S1, "path A (subcritical)"), ("B", S2, "path B (transcritical)")):
+        for p, colr, name in (("A", S1, "Path A (subcritical)"), ("B", S2, "Path B (transcritical)")):
             x = s[s.path == p].sort_values("loop_return_c")
             ax.plot(x.loop_return_c, x[col], color=colr, label=name, zorder=3)
         a = s[s.path == "A"]
@@ -302,7 +305,7 @@ def fig4_scan():
     axs[2].legend(loc="upper left")
     axs[0].set_title(f"Three objectives, three optima; only {s.loop_return_c.min():.0f}–{cap_lr:.0f} °C "
                      "fits the ID fan", loc="left", color=INK)
-    axs[-1].set_xlabel("loop return temperature (°C)")
+    axs[-1].set_xlabel("Loop return temperature (°C)")
     save(fig, "fig4_loop_return_scan",
          "ORC+RO at the 85 °C track and the measured duct. Grey: loop returns whose tube bank "
          "exceeds the ID fan's power margin. Markers: each objective's optimum for path A. Net "
@@ -341,8 +344,8 @@ def fig5_med():
     ax.text(50, used.mean() * 0.45, "heat turned into water", ha="center", fontsize=8, color=INK2)
     ax.set_xlim(0, 100)
     ax.set_ylim(0, q.max() * 1.22)
-    ax.set_xlabel("share of the 461 recorded running hours, hottest first (%)")
-    ax.set_ylabel("heat reaching the MED plant (MW)")
+    ax.set_xlabel("Share of the 461 recorded running hours, hottest first (%)")
+    ax.set_ylabel("Heat reaching the MED plant (MW)")
     ax.set_title(f"Direct-MED, {int(r.track_c)} °C track: sized for the 90th-percentile hour, "
                  f"the plant averages {cf:.0%} of its size", loc="left", color=INK)
     save(fig, "fig5_med_heat_duration",
@@ -363,7 +366,7 @@ def fig7_pinch_check():
     ax, mins = axs[0], {}
     for case, col, tx in (("before the fix", S2, 2.4), ("after the fix", S1, 5.6)):
         x = ba[(ba.case == case) & (ba.pct_duty_from_cold_end <= 12.0)].sort_values("pct_duty_from_cold_end")
-        ax.plot(x.pct_duty_from_cold_end, x.approach_k, color=col, label=case, zorder=3)
+        ax.plot(x.pct_duty_from_cold_end, x.approach_k, color=col, label=case.capitalize(), zorder=3)
         m = x[x.model_check_point.astype(bool)]
         ax.plot(m.pct_duty_from_cold_end, m.approach_k, "o", ms=5, mfc=col, mec="white", mew=1.2, zorder=4)
         i = x.approach_k.idxmin()
@@ -378,8 +381,8 @@ def fig7_pinch_check():
             va="bottom", fontsize=7.5, color=INK2)
     ax.set_xlim(0, 12)
     ax.set_ylim(min(mins.values()) - 0.6, ax.get_ylim()[1])
-    ax.set_xlabel("% of duty from the cold end")
-    ax.set_ylabel("temperature difference (K)")
+    ax.set_xlabel("Duty from the cold end (%)")
+    ax.set_ylabel("Temperature difference (K)")
     ax.set_title("ORC+RO evaporator, cold end", loc="left", color=INK)
     ax.legend(loc="upper left")
     ax = axs[1]
@@ -389,14 +392,14 @@ def fig7_pinch_check():
         ax.plot(x.pct_duty_from_cold_end, x.approach_k, color=S1 if head else BASE,
                 lw=1.8 if head else 0.9, zorder=3 if head else 2)
     ax.axhline(ORC_EVAPORATOR_PINCH_C, color=INK2, lw=0.8, zorder=2)
-    ax.text(98, ORC_EVAPORATOR_PINCH_C - 0.6, f"closest of all designs: {al.approach_k.min():.2f} K", ha="right",
+    ax.text(98, ORC_EVAPORATOR_PINCH_C - 0.6, f"Closest of all designs: {al.approach_k.min():.2f} K", ha="right",
             va="top", fontsize=7.5, color=INK2)
     ax.set_xlim(0, 100)
     ax.set_ylim(0, al.approach_k.max() * 1.08)
-    ax.set_xlabel("% of duty from the cold end")
+    ax.set_xlabel("Duty from the cold end (%)")
     ax.set_title(f"All {al.design.nunique()} reported ORC designs, after the fix", loc="left", color=INK)
     ax.legend(handles=[Line2D([0], [0], color=S1, lw=1.8, label="ORC+RO"),
-                       Line2D([0], [0], color=BASE, lw=0.9, label="the other designs")], loc="upper left")
+                       Line2D([0], [0], color=BASE, lw=0.9, label="The other designs")], loc="upper left")
     save(fig, "fig7_pinch_check",
          f"Temperature difference between the loop water and the working fluid along the ORC evaporator. Left: "
          f"ORC+RO's cold end before and after the check was made to include the working fluid's bubble point. "
@@ -471,13 +474,14 @@ def bridge_step(a_from, a_to, name, lab_from, lab_to, caption):
     ax.set_ylim(0, peak * 1.22)
     ax.set_ylabel("LCOW (A$/m³)")
     ax.set_title(f"Adding the ORC to {lab_from} costs A${tt - tf:.2f}/m³", loc="left", color=INK)
-    ax.legend(handles=[Patch(color=S1, label="LCOW"), Patch(color=S2, label="cost added"),
-                       Patch(color=S3, label="saving")], loc="upper left", ncol=3)
+    ax.legend(handles=[Patch(color=S1, label="LCOW"), Patch(color=S2, label="Cost added"),
+                       Patch(color=S3, label="Saving")], loc="upper left", ncol=3)
     note = (f"Global cost basis. {lab_from}: {rf.track_c:.0f} °C track, {rf.water_m3_per_day:,.0f} m³/day; "
             f"{lab_to}: {rt.track_c:.0f} °C track, {rt.water_m3_per_day:,.0f} m³/day.")
     if omitted:
         note += " Steps under A$0.0005/m³ not drawn: " + ", ".join(omitted) + "."
-    fig.text(0.01, -0.05, note, fontsize=7.5, color=INK2, wrap=True)
+    if not REPORT:
+        fig.text(0.01, -0.05, note, fontsize=7.5, color=INK2, wrap=True)
     save(fig, name, caption, "report_lcow_breakdown.csv, gps_module6_lcow_bhojwani_global_lcow.csv")
 
 
@@ -505,12 +509,12 @@ def diag_pinch():
     for ax, lo in ((axs[0], 0.0), (axs[1], 0.9)):
         x = p[p.fraction >= lo - 1e-9]
         m = x[x.model_check_point.astype(bool)]
-        ax.plot(x.fraction * 100, x.approach_k, color=S1, label="approach, 1,000 segments", zorder=3)
+        ax.plot(x.fraction * 100, x.approach_k, color=S1, label="Approach, 1,000 segments", zorder=3)
         ax.plot(m.fraction * 100, m.approach_k, "o", ms=5, mfc=INK, mec="white", mew=1.2, zorder=4,
-                label="the model's check points")
+                label="The model's check points")
         ax.axhline(ORC_EVAPORATOR_PINCH_C, color=INK2, lw=0.8, zorder=2)
         ax.plot(p.fraction[i] * 100, p.approach_k[i], "o", ms=6, mfc=CRIT, mec="white", mew=1.2, zorder=5)
-    fig.supxlabel("position along the exchanger (% of duty, from the hot end)", y=-0.04, fontsize=9,
+    fig.supxlabel("Position along the exchanger (% of duty, from the hot end)", y=-0.04, fontsize=9,
                   color=INK2)
     axs[1].annotate(f"true minimum {p.approach_k[i]:.2f} K\nat {p.fraction[i] * 100:.1f} % of duty\n"
                     "(the bubble point)", xy=(p.fraction[i] * 100, p.approach_k[i]),
@@ -520,7 +524,7 @@ def diag_pinch():
                 va="top", fontsize=7.5, color=INK2)
     axs[1].set_xlim(90, 100)
     axs[1].set_ylim(p.approach_k.min() - 1.0, p[p.fraction >= 0.9].approach_k.max() + 1.0)
-    axs[0].set_ylabel("approach temperature (K)")
+    axs[0].set_ylabel("Approach temperature (K)")
     axs[0].legend(loc="upper right")
     axs[0].set_title("ORC+RO evaporator, whole length", loc="left", color=INK)
     axs[1].set_title("Cold end, enlarged", loc="left", color=INK)
@@ -542,7 +546,7 @@ def fig6_monte_carlo():
     c = pd.read_csv(f)
     sm = pd.read_csv(SRC / "monte_carlo_summary.csv").query("distribution == 'triangular'")
     n = int(pd.read_csv(SRC / "monte_carlo_convergence.csv").n_draws.max())
-    series = (("Conventional SWRO (no heat recovery)", S1, "conventional SWRO"),
+    series = (("Conventional SWRO (no heat recovery)", S1, "Conventional SWRO"),
               ("Direct-RO (no ORC)", S2, "Direct-RO"),
               ("orc_ro_current (path A)", S3, "ORC+RO"))
     panels = (("bhojwani_global", "Global cost basis"),)
@@ -561,14 +565,16 @@ def fig6_monte_carlo():
                         va="bottom" if k == 1 else "baseline", fontsize=7.5, color=INK2)
         ax.set_yticks([0, 10, 50, 90, 100])
         ax.set_ylim(0, 100)
-        ax.set_title(title, loc="left", color=INK)
+        if not REPORT:
+            ax.set_title(title, loc="left", color=INK)
         ax.set_xlabel("LCOW (A$/m³)")
-    axs[0].set_ylabel("chance the LCOW is at\nor below this price (%)")
+    axs[0].set_ylabel("Chance the LCOW is at\nor below this price (%)")
     axs[0].legend(loc="lower right")
-    fig.text(0.01, -0.11,
-             f"Triangular Monte Carlo, {n:,} paired draws, global cost basis; dots mark the P50.\n"
-             "Read a tariff off the x-axis: the curve's height there is the chance of beating it.",
-             fontsize=7.5, color=INK2)
+    if not REPORT:
+        fig.text(0.01, -0.11,
+                 f"Triangular Monte Carlo, {n:,} paired draws, global cost basis; dots mark the P50.\n"
+                 "Read a tariff off the x-axis: the curve's height there is the chance of beating it.",
+                 fontsize=7.5, color=INK2)
     save(fig, "fig6_monte_carlo_scurves",
          "S-curves from the triangular Monte Carlo: the chance that each RO architecture's LCOW comes in at "
          "or below a given price, global cost basis. Reading a water tariff off the x-axis gives the chance "
