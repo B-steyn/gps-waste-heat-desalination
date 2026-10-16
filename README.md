@@ -138,12 +138,3 @@ folder is committed; `run_all.py` regenerates both.
   catches the cases it should, against designs frozen in
   `validation/fixtures/`.
 
-## Supporting-calculation numbers
-
-The supporting calculations keep the numbers of the calculation requests
-they answered during the thesis (CR4–CR15), so they can be matched to the
-report. The numbers missing from that file are not separate calculations:
-CR1 (capital split by item), CR2 (ORC exchangers costed by area), CR13 (the
-measured duct) and CR14 (the ID fan margin) are built into the model; CR3
-and CR8 are answered by the comparison of ORC+RO with Direct-RO and
-conventional SWRO; CR11 (a multi-unit Direct-MED) was not pursued.
